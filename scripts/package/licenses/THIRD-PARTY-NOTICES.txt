@@ -1,0 +1,24 @@
+Mitgelieferte Komponenten:
+
+VCamNetSampleSource
+Herkunft: https://github.com/smourier/VCamNetSample
+Lizenz: MIT; siehe VCamNetSample.txt.
+
+DirectNCore 1.18.0
+Herkunft: https://github.com/smourier/DirectN
+Lizenz laut NuGet-Paket: MIT; siehe DirectNCore.txt.
+
+WinRT.Runtime (C#/WinRT)
+Herkunft: https://github.com/microsoft/CsWinRT
+Lizenz: MIT; siehe CSharpWinRT.txt.
+
+Microsoft.Windows.SDK.NET
+Herkunft: Microsoft.Windows.SDK.NET.Ref (Windows SDK for .NET).
+Lizenz laut NuGet-Paket: https://aka.ms/WinSDKLicenseURL
+
+FFmpeg (ffmpeg.exe im Paketordner FFmpeg)
+Herkunft, Version und Build-Konfiguration: siehe FFmpeg.txt.
+Lizenz: GNU General Public License Version 3 oder später; siehe FFmpeg-GPLv3.txt.
+Wird nur installiert, wenn auf dem Ziel-PC kein FFmpeg gefunden wird.
+
+Die .NET Runtime wird nicht mitgeliefert.

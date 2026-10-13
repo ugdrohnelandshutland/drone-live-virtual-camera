@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <AssemblyName>DroneLive2VirtualCamera</AssemblyName>
+    <RootNamespace>DroneLive.App</RootNamespace>
+    <TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <ApplicationIcon>Resources/Application.ico</ApplicationIcon>
+    <Title>DroneLive2VirtualCamera</Title>
+    <Product>DroneLive2VirtualCamera</Product>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources/Application.ico" LogicalName="DroneLive.Application.ico" />
+    <None Update="configuration.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- Die eigene configuration.json ist nicht versioniert; ohne sie (frischer Klon) wird die Vorlage verwendet. -->
+    <None Update="configuration.example.json" Condition="!Exists('configuration.json')" Link="configuration.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <ProjectReference Include="../DroneLive.Core/DroneLive.Core.csproj" />
+    <ProjectReference Include="../../vendor/VCamNetSample/VCamNetSampleSource/VCamNetSampleSource.csproj" />
+  </ItemGroup>
+  <Target Name="KopiereComHost" AfterTargets="Build">
+    <ItemGroup>
+      <!-- Der tatsächliche Referenzpfad berücksichtigt auch die Lösungsplattform x64. -->
+      <KameraAssembly Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.Filename)' == 'VCamNetSampleSource' and '%(ReferenceCopyLocalPaths.Extension)' == '.dll'" />
+      <Kameradateien Include="@(KameraAssembly->'%(RootDir)%(Directory)VCamNetSampleSource.comhost.dll')" />
+      <Kameradateien Include="@(KameraAssembly->'%(RootDir)%(Directory)VCamNetSampleSource.runtimeconfig.json')" />
+      <Kameradateien Include="@(KameraAssembly->'%(RootDir)%(Directory)VCamNetSampleSource.deps.json')" />
+    </ItemGroup>
+    <Error Condition="'@(KameraAssembly)' == ''" Text="Die referenzierte Kameraquelle wurde nicht gefunden; COM-Dateien können nicht kopiert werden." />
+    <Copy SourceFiles="@(Kameradateien)" DestinationFolder="$(OutDir)" />
+  </Target>
+
+</Project>

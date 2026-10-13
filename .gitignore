@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+.vs/
+*.user
+artifacts/test-results/
+packages/
+upstream-tree.json
+*.log
+*:Zone.Identifier
+# Eigene Entwicklungskonfiguration mit der Adresse des Test-Hubs; Vorlage: configuration.example.json
+src/DroneLive.App/configuration.json

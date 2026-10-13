@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="src/DroneLive.App/DroneLive.App.csproj" />
+  <Project Path="src/DroneLive.Core/DroneLive.Core.csproj" />
+  <Project Path="tests/DroneLive.Tests/DroneLive.Tests.csproj" />
+  <Project Path="vendor/VCamNetSample/VCamNetSampleSource/VCamNetSampleSource.csproj">
+    <Platform Project="x64" />
+  </Project>
+</Solution>

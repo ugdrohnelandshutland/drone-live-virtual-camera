@@ -1,0 +1,6 @@
+{
+  "Serveradresse": "http://localhost:4444",
+  "FFmpegPfad": "ffmpeg.exe",
+  "Hardwaredekodierung": true,
+  "VirtuelleKamera": true
+}

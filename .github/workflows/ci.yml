@@ -1,0 +1,21 @@
+# Release-Build und Prüfprogramm (mit ffmpeg) bei jedem Push und Pull Request.
+# Die Prüfungen --installation und --kamera brauchen eine registrierte Kameraquelle und laufen nur lokal.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      # Die Prüfungen erzeugen ihre Testsignale mit libx264.
+      - run: choco install ffmpeg --no-progress -y
+      - run: dotnet build DroneLive2VirtualCamera.slnx -c Release -warnaserror
+      - run: dotnet run --project tests/DroneLive.Tests -c Release --no-build -- --ffmpeg C:\ProgramData\chocolatey\bin\ffmpeg.exe
