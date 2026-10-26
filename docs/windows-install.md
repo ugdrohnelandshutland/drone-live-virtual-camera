@@ -56,7 +56,7 @@ den Decoder-Pfad. Der Paketordner kann danach entfernt werden.
 FFmpeg wird zuerst am eingetragenen `FFmpegPfad`, dann im PATH und unter `C:\Program Files\FFmpeg`
 gesucht. Fehlt es, installiert das Skript das mitgelieferte FFmpeg nach
 `C:\Program Files\DroneLive2VirtualCamera\FFmpeg` und trägt `FFmpeg\ffmpeg.exe` relativ zur EXE ein;
-Updates erneuern diese Kopie, ohne die Konfiguration zu verändern. Ein ausdrücklich angegebener,
+Updates erneuern diese Kopie (eine identische, womöglich laufende bleibt unberührt), ohne die Konfiguration zu verändern. Ein ausdrücklich angegebener,
 aber fehlender `-FFmpegPfad` bricht die Installation ab.
 Die .NET Runtime bleibt eine separate Voraussetzung. `-NurPruefen` prüft das entpackte
 Paket und die Voraussetzungen ohne Systemänderung. Der Release-Build bleibt zusätzlich erhalten;
@@ -71,4 +71,4 @@ sie einen PC ohne FFmpeg nach und prüft Installation, Lauffähigkeit und relati
 mitgelieferten FFmpeg, dessen Erneuerung bei Updates und die Erkennung eines ausgetauschten FFmpeg.
 Die Prüfung installiert nur in einen Testordner und verändert die COM-Registrierung nicht.
 Zusätzlich prüft sie den Auslieferungsstandard `http://localhost:4444` und dass die Entwicklungskonfiguration im Release-Ordner unverändert bleibt.
-Am 12.10.2026 bestanden 37 Paketprüfungen unter Windows PowerShell 5.1 (Paket mit FFmpeg 6.1.1, 60,8 MB), darunter Dateiliste, Aufräumen bei Updates, Wiederherstellung aus der Sicherung und gesperrte Dateien. Die COM-Registrierung und das Beenden der Anwendung prüft sie nicht.
+Am 12.10.2026 bestanden 39 Paketprüfungen unter Windows PowerShell 5.1 (Paket mit FFmpeg 6.1.1, 60,8 MB), darunter Dateiliste, Aufräumen bei Updates, Wiederherstellung aus der Sicherung und gesperrte Dateien. Die COM-Registrierung und das Beenden der Anwendung prüft sie nicht.

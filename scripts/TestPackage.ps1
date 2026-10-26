@@ -82,7 +82,7 @@ try {
         (Get-FileHash -LiteralPath $konfigPfad).Hash -eq $konfigVorUpdate) 'Fehlgeschlagenes Update wird aus der Sicherung vollständig wiederhergestellt'
 }
 finally { Remove-Item -LiteralPath $sicherung -Recurse -Force }
-$sperre = [IO.File]::Open($kern, 'Open', 'Read', 'None')
+$sperre = [IO.File]::Open($kern, 'Open', 'Read', 'Read')
 try {
     $meldung = ''
     try { Kopiere-Datei (Join-Path $entpackt 'Application/DroneLive.Core.dll') $kern } catch { $meldung = $_.Exception.Message }
@@ -110,6 +110,14 @@ $erkannt = Ermittle-FFmpeg '' $konfigMitFFmpeg -Standardorte @()
 Pruefe ($erkannt -eq [IO.Path]::GetFullPath($mitgeliefertesFFmpeg)) 'Update erkennt das zuvor mitgelieferte FFmpeg'
 Kopiere-Anwendung $entpackt $zielMitFFmpeg $manifest $erkannt $false
 Pruefe ((Get-FileHash -LiteralPath $konfigMitFFmpeg).Hash -eq $konfigMitFFmpegVorher -and (Get-FileHash -LiteralPath $mitgeliefertesFFmpeg).Hash -eq $manifest.FFmpeg.SHA256) 'Update erneuert das mitgelieferte FFmpeg und erhält die Konfiguration bytegenau'
+$sperre = [IO.File]::Open($mitgeliefertesFFmpeg, 'Open', 'Read', 'Read')
+try { Kopiere-Anwendung $entpackt $zielMitFFmpeg $manifest $erkannt $false; $gesperrtOk = $true }
+catch { $gesperrtOk = $false }
+finally { $sperre.Dispose() }
+Pruefe $gesperrtOk 'Update ersetzt ein identisches, gesperrtes (laufendes) mitgeliefertes FFmpeg nicht und bricht nicht ab'
+'abweichend' | Set-Content -LiteralPath $mitgeliefertesFFmpeg
+Kopiere-Anwendung $entpackt $zielMitFFmpeg $manifest $erkannt $false
+Pruefe ((Get-FileHash -LiteralPath $mitgeliefertesFFmpeg).Hash -eq $manifest.FFmpeg.SHA256) 'Update ersetzt ein abweichendes mitgeliefertes FFmpeg durch die Paketversion'
 $fremderOrdner = Join-Path $pruefWurzel 'other-files'
 New-Item -ItemType Directory -Path $fremderOrdner | Out-Null
 'Bestehende andere Anwendung' | Set-Content -LiteralPath (Join-Path $fremderOrdner 'other.txt')

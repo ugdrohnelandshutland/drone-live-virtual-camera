@@ -188,7 +188,10 @@ function Kopiere-Anwendung {
     if ($mitgeliefert) {
         $ffmpegZiel = Join-Path $Ziel 'FFmpeg\ffmpeg.exe'
         New-Item -ItemType Directory -Path (Split-Path $ffmpegZiel -Parent) -Force | Out-Null
-        Kopiere-Datei (Join-Path $PaketOrdner 'FFmpeg/ffmpeg.exe') $ffmpegZiel
+        # Identische Kopie nicht ersetzen: Ein laufendes FFmpeg sperrt die Datei.
+        if (-not (Test-Path -LiteralPath $ffmpegZiel -PathType Leaf) -or (Get-FileHash -LiteralPath $ffmpegZiel -Algorithm SHA256).Hash -ne $Manifest.FFmpeg.SHA256) {
+            Kopiere-Datei (Join-Path $PaketOrdner 'FFmpeg/ffmpeg.exe') $ffmpegZiel
+        }
         if ((Get-FileHash -LiteralPath $ffmpegZiel -Algorithm SHA256).Hash -ne $Manifest.FFmpeg.SHA256) { throw 'Das kopierte FFmpeg stimmt nicht mit dem Paket überein.' }
         # Relativ zur EXE, damit der Eintrag auch nach einem Verschieben des Ordners gilt.
         $Decoder = 'FFmpeg\ffmpeg.exe'
