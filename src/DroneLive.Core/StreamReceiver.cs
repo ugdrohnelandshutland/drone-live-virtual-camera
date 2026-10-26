@@ -88,6 +88,7 @@ public sealed class StreamReceiver(Uri adresse, string ffmpeg, int breite, int h
             var leser = new FlvParser();
             int generation = 0;
             leser.Hinweis += meldung => { Interlocked.Increment(ref generation); status("Kein Signal", meldung); protokoll(meldung); };
+            leser.Warnung += protokoll;
             byte[]? konfiguration = null;
             FfmpegDecoder? decoder = null;
             try
@@ -95,7 +96,7 @@ public sealed class StreamReceiver(Uri adresse, string ffmpeg, int breite, int h
                 await foreach (var nachricht in kanal.Reader.ReadAllAsync(lauf.Token))
                 {
                     Interlocked.Add(ref wartendeBytes, -nachricht.Daten.Length);
-                    if (Environment.TickCount64 - nachricht.Empfangszeit > 750) throw new RueckstauException();
+                    if (Environment.TickCount64 - nachricht.Empfangszeit > 2500) throw new RueckstauException();
                     foreach (var paket in leser.Lese(nachricht.Daten))
                     {
                         if (konfiguration == null || !konfiguration.AsSpan().SequenceEqual(paket.Konfiguration))

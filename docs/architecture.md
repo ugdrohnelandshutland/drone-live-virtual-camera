@@ -49,10 +49,14 @@ Aufzeichnung mit originalen Zeitstempeln.
 - 4004: Fehler anzeigen und Wiederverbindung beenden.
 - 4008: Rückstand verwerfen, Decoder erneuern, nach 200 ms neu verbinden.
 - Geänderter Sequence-Header: alte Decoderausgaben verwerfen und ab dem nächsten Keyframe einen
-  neuen Decoder erstellen. Identische Header lösen keinen Neustart aus.
+  neuen Decoder erstellen. Identische Header lösen keinen Neustart aus; der erste Header einer
+  Verbindung gilt nicht als Änderung.
+- Ungültige oder zu lange NAL-Längen (z. B. Nullbytes am Paketende) beenden die Verbindung nicht:
+  gültige NALs davor werden ausgegeben, sonst wird das Paket verworfen und auf das nächste Keyframe
+  gewartet. Der erste Vorfall je Verbindung wird protokolliert; FLV-Tagfehler bleiben harte Fehler.
 - H.265/Enhanced RTMP und andere Codecs: verständlicher Fehler und Protokollmeldung.
 - Maximal 16 MiB je WebSocket-Nachricht; der Empfangskanal hält maximal 64 Nachrichten und
-  insgesamt 16 MiB. Ein Rückstand über 750 ms löst einen neuen Einstieg ab Keyframe aus.
+  insgesamt 16 MiB. Ein Rückstand über 2,5 s löst einen neuen Einstieg ab Keyframe aus.
   Diese kurze Reserve nimmt insbesondere den zwischengespeicherten Keyframe-Rückblick auf.
 - Rohbilder werden nicht aufgereiht: drei feste Bildplätze trennen laufendes Schreiben und
   veröffentlichte Bilder. Ein atomarer Zeiger gibt das vollständig geschriebene Bild frei;

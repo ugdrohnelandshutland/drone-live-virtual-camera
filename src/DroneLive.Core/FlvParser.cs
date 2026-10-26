@@ -11,7 +11,9 @@ public sealed class FlvParser
     private byte[] _parameter = [];
     private int _laengenBytes;
     private bool _warteAufSchluesselbild = true;
+    private bool _nalFehlerGemeldet;
     public event Action<string>? Hinweis;
+    public event Action<string>? Warnung;
     public void VerwerfeBisSchluesselbild() => _warteAufSchluesselbild = true;
 
     public IReadOnlyList<Videopaket> Lese(ReadOnlySpan<byte> nachricht)
@@ -52,10 +54,12 @@ public sealed class FlvParser
         {
             if (_konfiguration != null && nutzdaten.SequenceEqual(_konfiguration)) return;
             var (laengenBytes, parameter) = LeseKonfiguration(nutzdaten);
+            bool erste = _konfiguration == null;
             _konfiguration = nutzdaten.ToArray();
             _laengenBytes = laengenBytes;
             _parameter = parameter;
             _warteAufSchluesselbild = true;
+            if (erste) return;
             Hinweis?.Invoke("Neue H.264-Decoderkonfiguration empfangen.");
             return;
         }
@@ -66,17 +70,29 @@ public sealed class FlvParser
         if (_warteAufSchluesselbild && !schluesselbild) return;
         using var ausgabe = new MemoryStream();
         if (schluesselbild) ausgabe.Write(_parameter);
+        var gesamt = nutzdaten.Length;
+        int nals = 0;
         while (!nutzdaten.IsEmpty)
         {
-            if (nutzdaten.Length < _laengenBytes) throw new InvalidDataException("Unvollständige NAL-Länge.");
             uint laenge = 0;
-            for (int i = 0; i < _laengenBytes; i++) laenge = (laenge << 8) | nutzdaten[i];
+            if (nutzdaten.Length >= _laengenBytes)
+                for (int i = 0; i < _laengenBytes; i++) laenge = (laenge << 8) | nutzdaten[i];
+            if (nutzdaten.Length < _laengenBytes || laenge == 0 || laenge > nutzdaten.Length - _laengenBytes)
+            {
+                if (!_nalFehlerGemeldet)
+                {
+                    _nalFehlerGemeldet = true;
+                    Warnung?.Invoke($"Ungültige NAL-Länge im Videopaket übersprungen: Länge {laenge}, Rest {Math.Max(0, nutzdaten.Length - _laengenBytes)} Byte, Längenfeld {_laengenBytes} Byte, Offset {gesamt - nutzdaten.Length} von {gesamt}, Bytes: {Convert.ToHexString(nutzdaten[..Math.Min(16, nutzdaten.Length)])}.");
+                }
+                break;
+            }
             nutzdaten = nutzdaten[_laengenBytes..];
-            if (laenge == 0 || laenge > nutzdaten.Length) throw new InvalidDataException("Ungültige NAL-Länge.");
             ausgabe.Write([0, 0, 0, 1]);
             ausgabe.Write(nutzdaten[..(int)laenge]);
             nutzdaten = nutzdaten[(int)laenge..];
+            nals++;
         }
+        if (nals == 0) { _warteAufSchluesselbild = true; return; }
         _warteAufSchluesselbild = false;
         pakete.Add(new(ausgabe.ToArray(), dts, dts + komposition, schluesselbild, _konfiguration));
     }

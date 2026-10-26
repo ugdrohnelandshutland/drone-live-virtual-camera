@@ -18,7 +18,7 @@ dotnet build DroneLive2VirtualCamera.slnx -c Release
 .\scripts\RegisterCamera.ps1          # einmalig als Administrator: Kameraquelle aus dem Release-Ordner registrieren
 .\src\DroneLive.App\bin\Release\net10.0-windows10.0.22621.0\win-x64\DroneLive2VirtualCamera.exe
 # Serveradresse und FFmpeg-Pfad: configuration.json neben der EXE (Vorlage: src/DroneLive.App/configuration.example.json)
-dotnet run --project tests/DroneLive.Tests -c Release                    # Prüfprogramm (146 Prüfungen, braucht ffmpeg)
+dotnet run --project tests/DroneLive.Tests -c Release                    # Prüfprogramm (153 Prüfungen, braucht ffmpeg)
 dotnet run --project tests/DroneLive.Tests -c Release -- --bildaustausch   # nur Bildspeicher und Kameraquelle
 dotnet run --project tests/DroneLive.Tests -c Release -- --installation    # registrierte DLLs = aktueller Build?
 dotnet run --project tests/DroneLive.Tests -c Release -- --kamera          # virtuelle Kamera über den Windows Frame Server

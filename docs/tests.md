@@ -22,7 +22,7 @@ dotnet run --project tests/DroneLive.Tests -c Release -- --kamera
 ```
 
 Die Prüfungen benötigen den FFmpeg-Encoder `libx264` zum Erzeugen ihrer Testsignale.
-Sie prüfen die realen API-Feldnamen, alle AVC-NAL-Längen, Zeitstempel, fehlerhafte Tags,
+Sie prüfen die realen API-Feldnamen, alle AVC-NAL-Längen, ungültige NAL-Längen (überspringen statt Abbruch), Zeitstempel, fehlerhafte Tags,
 Codec-Ablehnung, Bildaustausch, Kein-Signal-Frist, RGB32/NV12-Samples, Media-Source-Ereignisse,
 alle vier Schlusscodes, die Backoff-Rücksetzung nach dekodierten Bildern, eine fragmentierte
 130-KiB-Nachricht und einen Auflösungswechsel innerhalb derselben Verbindung. Das Aufräumen verwaister
@@ -48,7 +48,7 @@ Der optionale Live-Test dekodiert 15 Sekunden vom Hub und speichert ein Vorschau
 
 ## Ergebnisse
 
-Der Release-Build wurde ohne Warnungen oder Fehler abgeschlossen. 146 lokale Prüfungen wurden
+Der Release-Build wurde ohne Warnungen oder Fehler abgeschlossen. 153 lokale Prüfungen wurden
 am 12.10.2026 bestanden. Im separaten Live-Test wurden zuletzt 500 Frames in 15 Sekunden über WSS dekodiert;
 ein echter Kamerawechsel mit Code 4001 wurde in einem früheren Live-Durchlauf ebenfalls verarbeitet.
 Die Oberflächenvorschau, das skalierte Live-Testbild und „Kein Signal“ wurden visuell geprüft.

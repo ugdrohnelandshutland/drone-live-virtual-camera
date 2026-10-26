@@ -80,6 +80,21 @@ foreach (int laengenBytes in new[] { 1, 2, 4 })
     parser.Lese(Konfiguration(laengenBytes, 77));
     Pruefe(parser.Lese(Frame(laengenBytes, false)).Count == 0, "Neue Konfiguration wartet auf Keyframe");
 }
+byte[] Paket(params byte[] nals) => Tag([0x17, 1, 0, 0, 0, .. nals]);
+var nalParser = new FlvParser();
+var nalWarnungen = new List<string>();
+int nalHinweise = 0;
+nalParser.Warnung += nalWarnungen.Add;
+nalParser.Hinweis += _ => nalHinweise++;
+nalParser.Lese(Konfiguration());
+Pruefe(nalHinweise == 0, "Erste Konfiguration einer Verbindung ist kein Konfigurationswechsel");
+Pruefe(nalParser.Lese(Paket(0, 0, 0, 2, 0x65, 0x88, 0, 0, 0, 0)).Count == 1 && nalWarnungen.Count == 1, "NAL mit angehängten Nullbytes: Paket wird ausgegeben, Hinweis gemeldet");
+Pruefe(nalParser.Lese(Paket(0, 0, 0, 9, 0x65, 0x88)).Count == 0 && nalParser.Lese(Frame(key: false)).Count == 0, "Zu lange NAL-Länge: Paket verworfen, Warten auf Keyframe");
+Pruefe(nalParser.Lese(Paket(0, 0, 0, 0, 0x65, 0x88)).Count == 0, "NAL-Länge 0: Paket verworfen");
+Pruefe(nalParser.Lese(Frame()).Count == 1 && nalParser.Lese(Frame(key: false)).Count == 1, "Nächster Keyframe wird nach ungültiger NAL-Länge normal dekodiert");
+var zweiNals = nalParser.Lese(Paket(0, 0, 0, 2, 0x06, 0x01, 0, 0, 0, 2, 0x65, 0x88)).Single();
+Pruefe(zweiNals.AnnexB.AsSpan().SequenceEqual(new byte[] { 0, 0, 0, 1, 0x67, 66, 0, 0, 0, 1, 0x68, 0xce, 0, 0, 0, 1, 0x06, 0x01, 0, 0, 0, 1, 0x65, 0x88 }), "Zwei NALs (SEI + IDR) erscheinen beide in Annex B");
+Pruefe(nalWarnungen.Count == 1 && nalHinweise == 0, "NAL-Hinweis nur einmal je Parser, ohne Konfigurationswechsel");
 ErwarteterFehler<InvalidDataException>(() => new FlvParser().Lese(Konfiguration(3)), "Reservierte NAL-Längenfeldgröße abgelehnt");
 ErwarteterFehler<NotSupportedException>(() => new FlvParser().Lese(Tag([0x90, 0x68, 0x76, 0x63, 0x31])), "Enhanced RTMP/H.265 meldet verständlichen Fehler");
 ErwarteterFehler<NotSupportedException>(() => new FlvParser().Lese(Tag([0x12, 0, 0, 0, 0])), "Anderer FLV-Videocodec abgelehnt");
@@ -347,7 +362,7 @@ using (var server = new TestServer(async (socket, nummer, token) =>
         }
     }, (_, _) => { }, zeile => { if (zeile.Contains("Neue H.264")) Interlocked.Increment(ref neueKonfigurationen); });
     await client.StarteAsync(abbruch.Token);
-    Pruefe(bildanzahl > 100 && neueKonfigurationen == 2 && server.Anzahl == 1, "Fragmentierte 130-KiB-Nachricht und Auflösungswechsel ohne Verbindungsabbruch");
+    Pruefe(bildanzahl > 100 && neueKonfigurationen == 1 && server.Anzahl == 1, "Fragmentierte 130-KiB-Nachricht und Auflösungswechsel ohne Verbindungsabbruch");
 }
 
 if (Argument("--server") is { } serveradresse)
